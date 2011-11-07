@@ -4,19 +4,23 @@ package jp.radiumsoftware.unity.plugin.webmediator;
 
 import com.unity3d.player.UnityPlayer;
 
+import java.util.Stack;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.webkit.WebChromeClient;
+import android.webkit.WebViewClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 
 public class WebViewInjector {
     private static WebView webView;
-    private static JavaScriptInterface jsif;
+    private static Stack<String> messageBuffer;
 
     public static void install(final String url) {
+        messageBuffer = new Stack<String>();
+
         UnityPlayer.currentActivity.runOnUiThread(new Runnable() {
             public void run() {
                 if (webView != null) return;
@@ -38,12 +42,38 @@ public class WebViewInjector {
                 webSettings.setJavaScriptEnabled(true);
                 webSettings.setSupportZoom(false);
                 // JavaScript インタフェースを組み込む。
-                webView.setWebChromeClient(new WebChromeClient());
-                jsif = new JavaScriptInterface();
-                webView.addJavascriptInterface(jsif, "mediator");
+                webView.setWebViewClient(new WebViewClient() {
+                    @Override  
+                    public boolean shouldOverrideUrlLoading(WebView view, String url)  {  
+                        if (url.substring(0, 9).equals("callback:")) {
+                            String body = url.substring(14); // remove "callback://app"
+                            int paramBegins = body.indexOf(';');
+                            if (paramBegins < 0) {
+                                messageBuffer.push(body);
+                                Log.d("WebViewClient", body);
+                            } else {
+                                String path = body.substring(0, paramBegins);
+                                messageBuffer.push(path);
+                                Log.d("WebViewClient", path);
+                                Log.d("WebViewClient", body.substring(paramBegins + 1));
+                            }
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }  
+                });
                 // 埋め込みページのロード。
                 webView.loadUrl(url);
             }
         });
+    }
+
+    public static String popMessage() {
+        if (messageBuffer.empty()) {
+            return null;
+        } else {
+            return messageBuffer.pop();
+        }
     }
 }
