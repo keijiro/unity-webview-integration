@@ -2,13 +2,21 @@
 
 ### サンプルの内容
 
-![Screenshot (DROID 2)](https://github.com/downloads/keijiro/unity-webview-integration/device-2011-11-01-123428.png)
+![Screenshot (DROID 2)](https://github.com/downloads/keijiro/unity-webview-integration/iPhone4.png)
 
-上半分が Unity の表示、下半分が web view となっています。Web view にあるボタンを押すとそのアクションが Unity 側に通知され、対応する色の箱がワールド上に生成されます。
+上半分が Unity の表示、下半分が web view となっています。Web view にあるリンクを押すとそのアクションが Unity 側に通知され、対応する箱がワールド上に生成されます。
 
 なお、画面上部にもボタンが用意されています。これは Unity 画面に対するインタラクションが有効であることを確認するために用意してあるものです。
 
 Web view 内に表示しているページの内容は[gh-pages ブランチ](https://github.com/keijiro/unity-webview-integration/tree/gh-pages)に格納されています。このブランチの内容は GitHub Pages によってウェブページとしてホスティングされています。
+
+### 仕組みの解説
+
+次のように "unity:" をスキームとして指定した URL へアクセスすると、その内容が Unity 側へとコールバックされるようになっています。
+
+    unity://callback/action/xyz?param1=foo&param2=bar
+
+Unity 側では URL のパス部分（上の例における `/action/xyz`　の部分）とパラメータを取得できます。
 
 ### 既知の問題 (iOS)
 
