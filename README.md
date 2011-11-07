@@ -8,6 +8,8 @@
 
 なお、画面上部にもボタンが用意されています。これは Unity 画面に対するインタラクションが有効であることを確認するために用意してあるものです。
 
+Web view 内に表示しているページの内容は[gh-pages ブランチ](https://github.com/keijiro/unity-webview-integration/tree/gh-pages)に格納されています。このブランチの内容は GitHub Pages によってウェブページとしてホスティングされています。
+
 ### 既知の問題 (iOS)
 
 - Web view に対するインタラクションを行っている最中は Unity 側の動作が止まるという問題があります。これは Display Link の使用を止めることによって回避できます。
