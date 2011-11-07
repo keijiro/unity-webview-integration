@@ -8,9 +8,11 @@
 
 なお、画面上部にもボタンが用意されています。これは Unity 画面に対するインタラクションが有効であることを確認するために用意してあるものです。
 
-### ローカルアセット版 (Android)
+Web view 内に表示しているページの内容は[gh-pages ブランチ](https://github.com/keijiro/unity-webview-integration/tree/gh-pages)に格納されています。このブランチの内容は GitHub Pages によってウェブページとしてホスティングされています。
 
-デフォルトではサーバ上の HTML ファイル（GitHub Pages 上に置いたもの）へアクセスするようになっています。[WebMediator.js](https://github.com/keijiro/unity-webview-integration/blob/master/unity/Assets/Scripts/WebMediator.js) で指定している URL をローカルアセットのもの（コメントアウトされているもの）に変更することで、ネットワークを使わない連携のテストを行うこともできます。
+### 既知の問題 (iOS)
+
+- Web view に対するインタラクションを行っている最中は Unity 側の動作が止まるという問題があります。これは Display Link の使用を止めることによって回避できます。
 
 ### 既知の問題 (Android)
 
