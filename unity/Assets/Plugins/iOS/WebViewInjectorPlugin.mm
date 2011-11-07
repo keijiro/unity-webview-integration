@@ -28,10 +28,10 @@ extern UIViewController *UnityGetGLViewController();
 }
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
-    if ([request.URL.scheme isEqualToString:@"callback"]) {
+    if ([request.URL.scheme isEqualToString:@"unity"]) {
         [messageQueue_ addObject:request.URL.path];
         NSLog(@"path - %@", request.URL.path);
-        NSLog(@"parameterString - %@", request.URL.parameterString);
+        NSLog(@"query - %@", request.URL.query);
         return NO;
     } else {
         return YES;

@@ -13,9 +13,7 @@ private var injector : AndroidJavaClass;
 
 function Awake() {
     injector = AndroidJavaClass("jp.radiumsoftware.unity.plugin.webmediator.WebViewInjector");
-    //injector.CallStatic("install", "http://keijiro.github.com/unity-webview-integration/mediator.html");
-    injector.CallStatic("install", "http://dl.dropbox.com/u/14572092/WebMediator/mediator.html");
-    //injector.CallStatic("install", "file:///android_asset/mediator.html");
+    injector.CallStatic("install", "http://keijiro.github.com/unity-webview-integration/mediator.html");
 }
 
 function Update() {
@@ -33,8 +31,7 @@ function Update() {
 @DllImportAttribute("__Internal") static private function _WebViewInjectorPopMessage() : String {}
 
 function Awake() {
-    //_WebViewInjectorInstall("http://keijiro.github.com/unity-webview-integration/mediator.html");
-    _WebViewInjectorInstall("http://dl.dropbox.com/u/14572092/WebMediator/mediator.html");
+    _WebViewInjectorInstall("http://keijiro.github.com/unity-webview-integration/mediator.html");
 }
 
 function Update() {

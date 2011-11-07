@@ -45,9 +45,9 @@ public class WebViewInjector {
                 webView.setWebViewClient(new WebViewClient() {
                     @Override  
                     public boolean shouldOverrideUrlLoading(WebView view, String url)  {  
-                        if (url.substring(0, 9).equals("callback:")) {
-                            String body = url.substring(14); // remove "callback://app"
-                            int paramBegins = body.indexOf(';');
+                        if (url.substring(0, 6).equals("unity:")) {
+                            String body = url.substring(16); // remove "unity://callback"
+                            int paramBegins = body.indexOf('?');
                             if (paramBegins < 0) {
                                 messageBuffer.push(body);
                                 Log.d("WebViewClient", body);
