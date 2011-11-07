@@ -17,12 +17,17 @@ import android.webkit.WebView;
 import android.widget.LinearLayout;
 
 public class WebViewInjector {
+    // 組み込まれる WebView
     private static WebView webView;
+
+    // WebView からのメッセージを保持するキュー
     private static SynchronousQueue<String> messageQueue;
 
+    // WebView の組み込み
     public static void install(final String url) {
+        // キューの初期化。
         messageQueue = new SynchronousQueue<String>();
-
+        // WebView の組み込みは UI スレッド内で行う。
         UnityPlayer.currentActivity.runOnUiThread(new Runnable() {
             public void run() {
                 if (webView != null) return;
@@ -43,30 +48,24 @@ public class WebViewInjector {
                 webSettings.setSaveFormData(false);
                 webSettings.setJavaScriptEnabled(true);
                 webSettings.setSupportZoom(false);
-                // JavaScript インタフェースを組み込む。
+                // URL コールバックを組み込む。
                 webView.setWebViewClient(new WebViewClient() {
                     @Override  
                     public boolean shouldOverrideUrlLoading(WebView view, String url)  {  
+                        // URL スキームが "unity:" であるかどうか。
                         if (url.substring(0, 6).equals("unity:")) {
-                            String body = url.substring(16); // remove "unity://callback"
-                            int paramBegins = body.indexOf('?');
-                            if (paramBegins < 0) {
-                                try {
-                                    messageQueue.put(body);
-                                } catch (java.lang.InterruptedException e) {
-                                }
-                                Log.d("WebViewClient", body);
-                            } else {
-                                String path = body.substring(0, paramBegins);
-                                try{
-                                    messageQueue.put(path);
-                                } catch (java.lang.InterruptedException e) {
-                                }
-                                Log.d("WebViewClient", path);
-                                Log.d("WebViewClient", body.substring(paramBegins + 1));
+                            // "unity://callback" までを削除。
+                            String body = url.substring(16);
+                            Log.d("WebViewClient", body);
+                            // キューに追加。
+                            try{
+                                messageQueue.put(body);
+                            } catch (java.lang.InterruptedException e) {
+                                Log.d("WebViewClient", "Queueing error - " + e.getMessage());
                             }
                             return true;
                         } else {
+                            // 普通にロードする。
                             return false;
                         }
                     }  
@@ -77,7 +76,8 @@ public class WebViewInjector {
         });
     }
 
-    public static String popMessage() {
+    // メッセージの取得。
+    public static String pollMessage() {
         return messageQueue.poll();
     }
 }
