@@ -33,14 +33,15 @@ function Update() {
 @DllImportAttribute("__Internal") static private function _WebViewInjectorPopMessage() : String {}
 
 function Awake() {
-    _WebViewInjectorInstall("http://keijiro.github.com/unity-webview-integration/mediator.html");
+    //_WebViewInjectorInstall("http://keijiro.github.com/unity-webview-integration/mediator.html");
+    _WebViewInjectorInstall("http://dl.dropbox.com/u/14572092/WebMediator/mediator.html");
 }
 
 function Update() {
     var message = _WebViewInjectorPopMessage();
-    if (message == "Red") {
+    if (message == "/Red") {
         Instantiate(prefabRedBox, prefabRedBox.transform.position, Random.rotation);
-    } else if (message == "Blue") {
+    } else if (message == "/Blue") {
         Instantiate(prefabBlueBox, prefabBlueBox.transform.position, Random.rotation);
     }
 }
