@@ -1,10 +1,12 @@
-// WebView を Unity に埋め込む処理を担当するクラス。
+// Unity 画面に対する WebView の組み込みと、メッセージのやりとりを担当するクラス。
 
 package jp.radiumsoftware.unity.plugin.webmediator;
 
 import com.unity3d.player.UnityPlayer;
 
-import java.util.Stack;
+import java.util.concurrent.SynchronousQueue;
+import java.lang.InterruptedException;
+
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -16,10 +18,10 @@ import android.widget.LinearLayout;
 
 public class WebViewInjector {
     private static WebView webView;
-    private static Stack<String> messageBuffer;
+    private static SynchronousQueue<String> messageQueue;
 
     public static void install(final String url) {
-        messageBuffer = new Stack<String>();
+        messageQueue = new SynchronousQueue<String>();
 
         UnityPlayer.currentActivity.runOnUiThread(new Runnable() {
             public void run() {
@@ -49,11 +51,17 @@ public class WebViewInjector {
                             String body = url.substring(16); // remove "unity://callback"
                             int paramBegins = body.indexOf('?');
                             if (paramBegins < 0) {
-                                messageBuffer.push(body);
+                                try {
+                                    messageQueue.put(body);
+                                } catch (java.lang.InterruptedException e) {
+                                }
                                 Log.d("WebViewClient", body);
                             } else {
                                 String path = body.substring(0, paramBegins);
-                                messageBuffer.push(path);
+                                try{
+                                    messageQueue.put(path);
+                                } catch (java.lang.InterruptedException e) {
+                                }
                                 Log.d("WebViewClient", path);
                                 Log.d("WebViewClient", body.substring(paramBegins + 1));
                             }
@@ -70,10 +78,6 @@ public class WebViewInjector {
     }
 
     public static String popMessage() {
-        if (messageBuffer.empty()) {
-            return null;
-        } else {
-            return messageBuffer.pop();
-        }
+        return messageQueue.poll();
     }
 }
