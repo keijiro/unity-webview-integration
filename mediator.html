@@ -1,9 +1,20 @@
 <html>
 <body>
 <center>
-<h3>(Loaded from server)</h3>
-<p><a onClick="window.mediator.pushMessage('Red')" href="#"><img src="button1.png" alt="Red Box" /></a></p>
-<p><a onClick="window.mediator.pushMessage('Blue')" href="#"><img src="button2.png" alt="Blue Box" /></a></p>
+<h3>(Loaded via HTTP)</h3>
+
+<p>
+  <a href="unity://callback/Red?param=test">
+    <img src="button1.png" alt="Red Box" />
+  </a>
+</p>
+
+<p>
+  <a href="unity://callback/Blue?param1=test1&param2=test2">
+    <img src="button2.png" alt="Blue Box" />
+  </a>
+</p>
+
 </center>
 </body>
 </html>
