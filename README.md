@@ -1,14 +1,22 @@
-このプロジェクトは、アプリ内に組み込んだ web view と Unity との間で連携を行うための仕組みを検証するものです。
+このプロジェクトは、アプリ内に組み込んだ web view と Unity の間で連携を行う仕組みを検証するものです。
 
 ### サンプルの内容
 
-![Screenshot (DROID 2)](https://github.com/downloads/keijiro/unity-webview-integration/device-2011-11-01-123428.png)
+![Screenshot (DROID 2)](https://github.com/downloads/keijiro/unity-webview-integration/iPhone4.png)
 
-上半分が Unity の表示、下半分が web view となっています。Web view にあるボタンを押すとそのアクションが Unity 側に通知され、対応する色の箱がワールド上に生成されます。
+上半分が Unity の表示、下半分が web view となっています。Web view にあるリンクを押すとそのアクションが Unity 側に通知され、対応する箱がワールド上に生成されます。
 
 なお、画面上部にもボタンが用意されています。これは Unity 画面に対するインタラクションが有効であることを確認するために用意してあるものです。
 
-Web view 内に表示しているページの内容は[gh-pages ブランチ](https://github.com/keijiro/unity-webview-integration/tree/gh-pages)に格納されています。このブランチの内容は GitHub Pages によってウェブページとしてホスティングされています。
+Web view に表示しているページのソースは[gh-pagesブランチ](https://github.com/keijiro/unity-webview-integration/tree/gh-pages)に格納されています。このブランチの内容は GitHub Pages によってウェブページとしてホスティングされています。
+
+### インタフェース
+
+次のように`unity:`をスキームとした URL へアクセスすると、その内容が Unity 側へとコールバックされます。
+
+    unity://callback/action/xyz?param1=foo&param2=bar
+
+Unity 側では URL のパス部分（上の例における`/action/xyz`）とパラメータ（上の例における`param1=foo`と`param2=bar`）を取得できます。
 
 ### 既知の問題 (iOS)
 
