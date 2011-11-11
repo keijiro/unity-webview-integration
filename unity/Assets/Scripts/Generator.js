@@ -22,7 +22,7 @@ function Update() {
         var box = Instantiate(prefab, redBoxPrefab.transform.position, Random.rotation) as GameObject; 
 
         if (message.params.ContainsKey("scale")) {
-            box.transform.localScale = Vector3.one * float.Parse(message.params["scale"]);
+            box.transform.localScale = Vector3.one * float.Parse(message.params["scale"] as String);
         }
     }
 }
