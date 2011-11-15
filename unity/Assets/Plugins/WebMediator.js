@@ -25,30 +25,59 @@ class WebMediatorMessage {
     }
 }
 
+// 唯一のインスタンス
+private static var instance : WebMediator;
+
+private var lastRequestedUrl : String;  // 最近リクエストされた URL
+private var loadRequest : boolean;      // 読み込みリクエストフラグ
+
+// WebView のインストール
+static function Install(initialUrl : String) {
+    if (instance == null) {
+        // 更新用ゲームオブジェクトを作る。
+        instance = (new GameObject()).AddComponent.<WebMediator>();
+        // 初期 URL を設定する。
+        instance.lastRequestedUrl = initialUrl;
+        // プラットフォーム依存の組み込み。
+        InstallPlatform();
+    }
+}
+
+// 指定 URL のロードをリクエスト
+static function LoadUrl(url : String) {
+    instance.lastRequestedUrl = url;
+    instance.loadRequest = true;
+}
+
+function Update() {
+    UpdatePlatform();
+    instance.loadRequest = false;
+}
+
 #if UNITY_EDITOR
 
 // Unity エディター用ダミー実装
-
-static function Install(url : String) {
-}
-
-static function PollMessage() : WebMediatorMessage {
-    return null;
-}
+private static function InstallPlatform() { }
+private static function UpdatePlatform() { }
+static function PollMessage() : WebMediatorMessage { return null; }
 
 #elif UNITY_ANDROID
 
 // Android 用実装
 
-private static var injector : AndroidJavaClass;
+private static function InstallPlatform() {
+}
 
-static function Install(url : String) {
-    injector = AndroidJavaClass("jp.radiumsoftware.unity.plugin.webmediator.WebViewInjector");
-    injector.CallStatic("install", url);
+private static function UpdatePlatform() {
+    var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); ;
+    var activity = player.GetStatic.<AndroidJavaObject>("currentActivity");
+    activity.Call("update", instance.lastRequestedUrl, instance.loadRequest);
 }
 
 static function PollMessage() : WebMediatorMessage {
-    var message = injector.CallStatic.<String>("pollMessage");
+    var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); ;
+    var activity = player.GetStatic.<AndroidJavaObject>("currentActivity");
+    var message = activity.Call.<String>("pollMessage");
     return message ? new WebMediatorMessage(message) : null;
 }
 
@@ -57,10 +86,15 @@ static function PollMessage() : WebMediatorMessage {
 // iPhone 用実装
 
 @DllImportAttribute("__Internal") static private function _WebViewInjectorInstall(url : String) {}
+@DllImportAttribute("__Internal") static private function _WebViewInjectorLoadUrl(url : String) {}
 @DllImportAttribute("__Internal") static private function _WebViewInjectorPollMessage() : String {}
 
-static function Install(url : String) {
-    _WebViewInjectorInstall(url);
+private static function InstallPlatform() {
+    _WebViewInjectorInstall(instance.lastRequestedUrl);
+}
+
+private static function UpdatePlatform() {
+    if (instance.loadRequest) _WebViewInjectorLoadUrl(instance.lastRequestedUrl);
 }
 
 static function PollMessage() : WebMediatorMessage {
