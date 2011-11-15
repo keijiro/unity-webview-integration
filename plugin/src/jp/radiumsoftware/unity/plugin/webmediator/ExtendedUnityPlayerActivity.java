@@ -18,11 +18,14 @@ import android.webkit.WebView;
 import android.widget.LinearLayout;
 
 public class ExtendedUnityPlayerActivity extends UnityPlayerActivity {
-    private WebView webView;
-    private boolean initialLoaded;
-
     // WebView からのメッセージを保持するキュー
     private SynchronousQueue<String> messageQueue;
+
+    // 組み込まれる WebView の実体
+    private WebView webView;
+
+    // 最初のページ読み込みが行われたかどうか
+    private boolean initialLoaded;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

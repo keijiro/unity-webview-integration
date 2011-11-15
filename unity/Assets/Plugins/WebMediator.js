@@ -65,18 +65,19 @@ static function PollMessage() : WebMediatorMessage { return null; }
 
 // Android 用実装
 
+private static var unityPlayerClass : AndroidJavaClass;
+
 private static function InstallPlatform() {
+    unityPlayerClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
 }
 
 private static function UpdatePlatform() {
-    var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); ;
-    var activity = player.GetStatic.<AndroidJavaObject>("currentActivity");
+    var activity = unityPlayerClass.GetStatic.<AndroidJavaObject>("currentActivity");
     activity.Call("update", instance.lastRequestedUrl, instance.loadRequest);
 }
 
 static function PollMessage() : WebMediatorMessage {
-    var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); ;
-    var activity = player.GetStatic.<AndroidJavaObject>("currentActivity");
+    var activity = unityPlayerClass.GetStatic.<AndroidJavaObject>("currentActivity");
     var message = activity.Call.<String>("pollMessage");
     return message ? new WebMediatorMessage(message) : null;
 }
