@@ -10,7 +10,7 @@ private var note : String;
 
 private function ActivateWebView() {
     // 指定 URL のロード要求。
-    WebMediator.LoadUrl("http://keijiro.github.com/unity-webview-integration/mediator.html");
+    WebMediator.LoadUrl("http://keijiro.github.com/unity-webview-integration/index.html");
     // 表示を有効化する。
     WebMediator.SetMargin(12, Screen.height / 2 + 12, 12, 12);
     WebMediator.Show();
