@@ -41,7 +41,7 @@ private function ProcessMessages() {
             }
         } else if (message.path == "/note") {
             // 引数からテキストを受け取る。
-            note = message.args["text"];
+            note = message.args["text"] as String;
         } else if (message.path == "/close") {
             // WebView の非表示化。
             DeactivateWebView();
