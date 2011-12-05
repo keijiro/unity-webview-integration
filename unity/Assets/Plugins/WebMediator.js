@@ -1,20 +1,19 @@
 #pragma strict
 
-// WebView との仲介を行うスクリプト。
+// WebView-Unity mediator plugin script.
 
 import System.Runtime.InteropServices;
 
-// メッセージクラス
+// Message container class.
 class WebMediatorMessage {
-    var path : String;          // メッセージパス
-    var args : Hashtable;     // 引数テーブル
+    var path : String;      // Message path
+    var args : Hashtable;   // Argument table
 
-    // コンストラクタの定義
     function WebMediatorMessage(rawMessage : String) {
-        // パス部分を抽出。
+        // Retrieve a path.
         var split = rawMessage.Split("?"[0]);
         path = split[0];
-        // パラメーター部分の分解。
+        // Parse arguments.
         args = new Hashtable();
         if (split.Length > 1) {
             for (var pair in split[1].Split("&"[0])) {
@@ -25,28 +24,28 @@ class WebMediatorMessage {
     }
 }
 
-// 唯一のインスタンス
 private static var instance : WebMediator;
 
-private var lastRequestedUrl : String;  // 最近リクエストされた URL
-private var loadRequest : boolean;      // 読み込みリクエストフラグ
-private var visibility : boolean;       // 表示状態
-private var leftMargin : int;           // マージン幅
+private var lastRequestedUrl : String;
+private var loadRequest : boolean;
+private var visibility : boolean;
+private var leftMargin : int;
 private var topMargin : int;
 private var rightMargin : int;
 private var bottomMargin : int;
 
-// WebView のインストール
+// Install the plugin.
+// Call this at least once before using the plugin.
 static function Install() {
     if (instance == null) {
-        // 更新用ゲームオブジェクトを作る。
-        instance = (new GameObject()).AddComponent.<WebMediator>();
-        // プラットフォーム依存の組み込み。
+        var master = new GameObject("WebMediator");
+        DontDestroyOnLoad(master);
+        instance = master.AddComponent.<WebMediator>();
         InstallPlatform();
     }
 }
 
-// マージン幅の設定
+// Set margins around the web view.
 static function SetMargin(left : int, top: int, right : int, bottom : int) {
     instance.leftMargin = left;
     instance.topMargin = top;
@@ -54,7 +53,7 @@ static function SetMargin(left : int, top: int, right : int, bottom : int) {
     instance.bottomMargin = bottom;
 }
 
-// 表示状態の操作
+// Visibility functions.
 static function Show() {
     instance.visibility = true;
 }
@@ -65,7 +64,7 @@ static function IsVisible() {
     return instance.visibility;
 }
 
-// 指定 URL のロードをリクエスト
+// Load the page at the URL.
 static function LoadUrl(url : String) {
     instance.lastRequestedUrl = url;
     instance.loadRequest = true;
@@ -78,14 +77,15 @@ function Update() {
 
 #if UNITY_EDITOR
 
-// Unity エディター用ダミー実装
+// Unity Editor implementation.
+
 private static function InstallPlatform() { }
 private static function UpdatePlatform() { }
 static function PollMessage() : WebMediatorMessage { return null; }
 
 #elif UNITY_ANDROID
 
-// Android 用実装
+// Android platform implementation.
 
 private static var unityPlayerClass : AndroidJavaClass;
 
