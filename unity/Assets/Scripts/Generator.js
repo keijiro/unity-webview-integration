@@ -42,6 +42,14 @@ private function ProcessMessages() {
         } else if (message.path == "/note") {
             // 引数からテキストを受け取る。
             note = message.args["text"] as String;
+        } else if (message.path == "/print") {
+            // 引数からテキストを受け取る。
+            var text = message.args["line1"] as String;
+            if (message.args.ContainsKey("line2")) {
+                text += "\n" + message.args["line2"] as String;
+            }
+            Debug.Log(text);
+            Debug.Log("(" + text.Length + " chars)");
         } else if (message.path == "/close") {
             // WebView の非表示化。
             DeactivateWebView();
