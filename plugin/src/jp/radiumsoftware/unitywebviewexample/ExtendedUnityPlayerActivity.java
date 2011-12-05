@@ -18,8 +18,25 @@ import android.webkit.WebView;
 import android.widget.FrameLayout;
 
 public class ExtendedUnityPlayerActivity extends UnityPlayerActivity {
-    // WebView からのメッセージを保持するキュー
-    private SynchronousQueue<String> mMessageQueue;
+
+    // JavaScript interface class for embedded WebView.
+    private class JavaScriptInterface {
+        public SynchronousQueue<String> mMessageQueue;
+
+        JavaScriptInterface() {
+            mMessageQueue = new SynchronousQueue<String>();
+        }
+
+        public void pushMessage(String message) {
+            try {
+                mMessageQueue.put(message);
+            } catch (java.lang.InterruptedException e) {
+                Log.d("WebViewClient", "Queueing error - " + e.getMessage());
+            }
+        }
+    }
+
+    private JavaScriptInterface mJavaScriptInterface;
 
     // 組み込まれる WebView の実体
     private WebView mWebView;
@@ -32,8 +49,6 @@ public class ExtendedUnityPlayerActivity extends UnityPlayerActivity {
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // キューの初期化。
-        mMessageQueue = new SynchronousQueue<String>();
         // WebView の組み込み。
         installWebView();
     }
@@ -80,7 +95,7 @@ public class ExtendedUnityPlayerActivity extends UnityPlayerActivity {
 
     // メッセージの取得
     public String pollWebViewMessage() {
-        return mMessageQueue.poll();
+        return mJavaScriptInterface.mMessageQueue.poll();
     }
 
     // WebView の組み込み
@@ -93,29 +108,15 @@ public class ExtendedUnityPlayerActivity extends UnityPlayerActivity {
         layout.addView(mWebView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT, Gravity.NO_GRAVITY));
         // WebView の設定。
         WebSettings webSettings = mWebView.getSettings();
-        webSettings.setSavePassword(false);
-        webSettings.setSaveFormData(false);
         webSettings.setJavaScriptEnabled(true);
         webSettings.setSupportZoom(false);
+        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         webSettings.setPluginsEnabled(true);
-        // コールバックの組み込み
-        mWebView.setWebViewClient(new WebViewClient() {
-            @Override  
-            public boolean shouldOverrideUrlLoading(WebView view, String url)  {  
-                if (url.substring(0, 6).equals("unity:")) {
-                    String body = url.substring(16);
-                    Log.d("WebViewClient", body);
-                    try{
-                        mMessageQueue.put(body);
-                    } catch (java.lang.InterruptedException e) {
-                        Log.d("WebViewClient", "Queueing error - " + e.getMessage());
-                    }
-                    return true;
-                } else {
-                    return false;
-                }
-            }  
-        });
+        // Set a dummy WebViewClient (which enables load new pages in WebView).
+        mWebView.setWebViewClient(new WebViewClient(){});
+        // Create a JavaScript interface and bind the WebView to it.
+        mJavaScriptInterface = new JavaScriptInterface();
+        mWebView.addJavascriptInterface(mJavaScriptInterface, "UnityInterface");
         // 最初は非表示状態にしておく。
         mWebView.setVisibility(View.GONE);
 
