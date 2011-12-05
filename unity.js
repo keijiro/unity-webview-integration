@@ -9,7 +9,7 @@ function UnityWebMediator() {
             for (var key in args) {
                 stack.push(key + "=" + encodeURIComponent(args[key]));
             }
-            message += "?" + stack.join("&"));
+            message += "?" + stack.join("&");
         }
         
         if (this.android) {
