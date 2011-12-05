@@ -1,24 +1,48 @@
+<!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" />
-<style type="text/css" media="screen">
-body {
-    background: white;
-    color: #222;
-    font-family: sans-serif;
-    font-size: 13pt;
-}
-a {
-    text-decoration: none;
-    color: #7070f0;
-}
-p { line-height: 180%; }
-li { line-height: 180%; }
-</style>
+  <meta charset="utf-8" />
+
+  <style type="text/css" media="screen">
+    body {
+      background: white;
+      color: #222;
+      font-family: sans-serif;
+      font-size: 13pt;
+    }
+    a {
+      text-decoration: none;
+      color: #7070f0;
+    }
+    p { line-height: 180%; }
+    li { line-height: 180%; }
+  </style>
+
+  <script src="unity.js"></script>
+
+  <script>
+    unity = new UnityWebMediator;
+
+    unity.callback("/print", {line1:"First callback"});
+    unity.callback("/print", {line1:"Second callback (line1)", line2:"Second callback (line 2)"});
+
+    function MultipleCallbackTest() {
+        unity.callback("/note", {text:"This text have to be overwritten by the next callback."});
+        unity.callback("/note", {text:"It works."});
+    }
+  </script>
+
+  <title>Unity - WebView Integration Test Page</title>
+
+  <p><ul>
+    <li><a href="#" onclick='unity.callback("/note", {text:"こんにちは"})'>「こんにちは」</a></li>
+    <li><a href="#" onclick='unity.callback("/note", {text:"こんばんは"})'>「こんばんは」</a></li>
+    <li><a href="#" onclick='unity.callback("/note", {text:"!@#$%^&*()-+"})'>"!@#$%^&*()-+"</a></li>
+    <li><a href="#" onclick='unity.callback("/note", {text:[0,1,2,3,4,5]})'>Passing an array.</a></li>
+    <li><a href="#" onclick='MultipleCallbackTest()'>Multiple callback test.</a></li>
+    <li><a href="#" onclick='unity.callback("/close")'>Close</a></li>
+    <li><a href="index.html">Back to top.</a></li>
+  </ul></p>
+
 </head>
 <body>
-<p>これはページ遷移の検証のために用意した "page 2" です。</p>
-<p>このページからは下記のリンクにより元のページへと戻ることができます。また、一旦ホーム画面へ移行したから再びこのアプリへと戻ったとき、自動的に元のページへと戻る可能性があります。自動的に元のページへと戻るかどうかは、アプリが kill されたかどうかによって決まります（kill されなければ、このページが維持されるはずです）。</p>
-<p><a href="mediator.html">元のページへ戻る</a></p>
-</body>
-</html>

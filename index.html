@@ -1,10 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset='utf-8'>
-<title>Placeholder Page</title>
+  <meta charset="utf-8" />
+
+  <style type="text/css" media="screen">
+    body {
+      background: white;
+      color: #222;
+      font-family: sans-serif;
+      font-size: 13pt;
+    }
+    a {
+      text-decoration: none;
+      color: #7070f0;
+    }
+    p { line-height: 180%; }
+    li { line-height: 180%; }
+  </style>
+
+  <script src="unity.js"></script>
+
+  <script>
+    unity = new UnityWebMediator;
+  </script>
+
+  <title>Unity - WebView Integration Test Page</title>
+
+  <p><ul>
+    <li><a href="#" onclick='unity.callback("/spawn")'>Spawn a box</a></li>
+    <li><a href="#" onclick='unity.callback("/spawn", {color:"red"})'>Spawn a red box</a></li>
+    <li><a href="#" onclick='unity.callback("/spawn", {color:"blue"})'>Spawn a blue box</a></li>
+    <li><a href="#" onclick='unity.callback("/spawn", {color:"red", scale:0.5})'>Spawn a small red box</a></li>
+    <li><a href="#" onclick='unity.callback("/spawn", {color:"blue", scale:0.5})'>Spawn a small blue box</a></li>
+    <li><a href="#" onclick='unity.callback("/note", {text:"こんにちは"})'>「こんにちは」</a></li>
+    <li><a href="#" onclick='unity.callback("/close")'>Close</a></li>
+    <li><a href="page2.html">Go to page 2.</a></li>
+  </ul></p>
+
 </head>
 <body>
-<p>This is a placeholder page.</p>
-</body>
-</html>
