@@ -1,49 +1,48 @@
 #pragma strict
 
-// 入力に応じて箱を生み出すスクリプト
-
 var guiSkin : GUISkin;
 var redBoxPrefab : GameObject;
 var blueBoxPrefab : GameObject;
 
 private var note : String;
 
+// Show the web view (with margins) and load the index page.
 private function ActivateWebView() {
-    // 指定 URL のロード要求。
     WebMediator.LoadUrl("http://keijiro.github.com/unity-webview-integration/index.html");
-    // 表示を有効化する。
     WebMediator.SetMargin(12, Screen.height / 2 + 12, 12, 12);
     WebMediator.Show();
 }
 
+// Hide the web view.
 private function DeactivateWebView() {
-    // 表示を無効化する
     WebMediator.Hide();
+    // Clear the state of the web view (by loading a blank page).
+    WebMediator.LoadUrl("about:blank");
 }
 
+// Process messages coming from the web view.
 private function ProcessMessages() {
     while (true) {
+        // Poll a message or break.
         var message = WebMediator.PollMessage();
         if (!message) break;
 
         if (message.path == "/spawn") {
-            // 引数に応じた箱を生成する。
+            // "spawn" message.
             if (message.args.ContainsKey("color")) {
                 var prefab = (message.args["color"] == "red") ? redBoxPrefab : blueBoxPrefab;
             } else {
                 prefab = Random.value < 0.5 ? redBoxPrefab : blueBoxPrefab;
             }
-
             var box = Instantiate(prefab, redBoxPrefab.transform.position, Random.rotation) as GameObject; 
-
             if (message.args.ContainsKey("scale")) {
                 box.transform.localScale = Vector3.one * float.Parse(message.args["scale"] as String);
             }
         } else if (message.path == "/note") {
-            // 引数からテキストを受け取る。
+            // "note" message.
             note = message.args["text"] as String;
         } else if (message.path == "/print") {
-            // 引数からテキストを受け取る。
+            // "print" message.
             var text = message.args["line1"] as String;
             if (message.args.ContainsKey("line2")) {
                 text += "\n" + message.args["line2"] as String;
@@ -51,34 +50,28 @@ private function ProcessMessages() {
             Debug.Log(text);
             Debug.Log("(" + text.Length + " chars)");
         } else if (message.path == "/close") {
-            // WebView の非表示化。
+            // "close" message.
             DeactivateWebView();
         }
     }
 }
 
 function Start() {
-    // WebView の組み込み。ここではまだ非表示。
     WebMediator.Install();
 }
 
 function Update() {
     if (WebMediator.IsVisible()) {
         ProcessMessages();
-    } else {
-        if (Input.GetButtonDown("Fire1") && Input.mousePosition.y < Screen.height / 2) {
-            ActivateWebView();
-        }
+    } else if (Input.GetButtonDown("Fire1") && Input.mousePosition.y < Screen.height / 2) {
+        ActivateWebView();
     }
 }
 
 function OnGUI() {
     var sw = Screen.width;
     var sh = Screen.height;
-
     GUI.skin = guiSkin;
-
     if (note) GUI.Label(Rect(0, 0, sw, 0.5 * sh), note);
-
     GUI.Label(Rect(0, 0.5 * sh, sw, 0.5 * sh), "TAP HERE", "center");
 }
