@@ -1,0 +1,124 @@
+// WebView 組み込み用に拡張した UnityPlayerActivity クラス。
+
+package jp.radiumsoftware.unitywebviewexample;
+
+import com.unity3d.player.UnityPlayerActivity;
+
+import java.util.concurrent.SynchronousQueue;
+import java.lang.InterruptedException;
+
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.webkit.WebViewClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.widget.FrameLayout;
+
+public class ExtendedUnityPlayerActivity extends UnityPlayerActivity {
+    // WebView からのメッセージを保持するキュー
+    private SynchronousQueue<String> mMessageQueue;
+
+    // 組み込まれる WebView の実体
+    private WebView mWebView;
+
+    // WebView 周辺のマージン量
+    private int mLeftMargin, mTopMargin, mRightMargin, mBottomMargin;
+
+    // 最初のページ読み込みが行われたかどうか
+    private boolean mInitialLoad;
+
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // キューの初期化。
+        mMessageQueue = new SynchronousQueue<String>();
+        // WebView の組み込み。
+        installWebView();
+    }
+
+    // フレーム更新時に実行する処理
+    public void updateWebView(final String lastRequestedUrl, final boolean loadRequest, final boolean visibility, final int leftMargin, final int topMargin, final int rightMargin, final int bottomMargin) {
+        // ロード要求の処理。
+        if (lastRequestedUrl != null && (loadRequest || !mInitialLoad)) {
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    mWebView.loadUrl(lastRequestedUrl);
+                }
+            });
+            mInitialLoad = true;
+        }
+        // マージン幅の処理。
+        if (leftMargin != mLeftMargin || topMargin != mTopMargin || rightMargin != mRightMargin || bottomMargin != mBottomMargin) {
+            mLeftMargin = leftMargin;
+            mTopMargin = topMargin;
+            mRightMargin = rightMargin;
+            mBottomMargin = bottomMargin;
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT, Gravity.NO_GRAVITY);
+                    params.setMargins(mLeftMargin, mTopMargin, mRightMargin, mBottomMargin);
+                    mWebView.setLayoutParams(params);
+                }
+            });
+        }
+        // 表示状態の処理。
+        if (visibility != (mWebView.getVisibility() == View.VISIBLE)) {
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    if (visibility) {
+                        mWebView.setVisibility(View.VISIBLE);
+                        mWebView.requestFocus();
+                    } else {
+                        mWebView.setVisibility(View.GONE);
+                    }
+                }
+            });
+        }
+    }
+
+    // メッセージの取得
+    public String pollWebViewMessage() {
+        return mMessageQueue.poll();
+    }
+
+    // WebView の組み込み
+    private void installWebView() {
+        // FrameLayout の構築。
+        FrameLayout layout = new FrameLayout(this);
+        addContentView(layout, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+        // WebView の作成。
+        mWebView = new WebView(this);
+        layout.addView(mWebView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT, Gravity.NO_GRAVITY));
+        // WebView の設定。
+        WebSettings webSettings = mWebView.getSettings();
+        webSettings.setSavePassword(false);
+        webSettings.setSaveFormData(false);
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setSupportZoom(false);
+        webSettings.setPluginsEnabled(true);
+        // コールバックの組み込み
+        mWebView.setWebViewClient(new WebViewClient() {
+            @Override  
+            public boolean shouldOverrideUrlLoading(WebView view, String url)  {  
+                if (url.substring(0, 6).equals("unity:")) {
+                    String body = url.substring(16);
+                    Log.d("WebViewClient", body);
+                    try{
+                        mMessageQueue.put(body);
+                    } catch (java.lang.InterruptedException e) {
+                        Log.d("WebViewClient", "Queueing error - " + e.getMessage());
+                    }
+                    return true;
+                } else {
+                    return false;
+                }
+            }  
+        });
+        // 最初は非表示状態にしておく。
+        mWebView.setVisibility(View.GONE);
+
+        Log.d("WebMediator", "installed");
+    }
+} 

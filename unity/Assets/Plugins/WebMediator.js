@@ -7,7 +7,7 @@ import System.Runtime.InteropServices;
 // メッセージクラス
 class WebMediatorMessage {
     var path : String;          // メッセージパス
-    var params : Hashtable;     // 引数テーブル
+    var args : Hashtable;     // 引数テーブル
 
     // コンストラクタの定義
     function WebMediatorMessage(rawMessage : String) {
@@ -15,11 +15,11 @@ class WebMediatorMessage {
         var split = rawMessage.Split("?"[0]);
         path = split[0];
         // パラメーター部分の分解。
-        params = new Hashtable();
+        args = new Hashtable();
         if (split.Length > 1) {
             for (var pair in split[1].Split("&"[0])) {
                 var elems = pair.Split("="[0]);
-                params[elems[0]] = elems[1];
+                args[elems[0]] = WWW.UnEscapeURL(elems[1]);
             }
         }
     }
@@ -30,17 +30,39 @@ private static var instance : WebMediator;
 
 private var lastRequestedUrl : String;  // 最近リクエストされた URL
 private var loadRequest : boolean;      // 読み込みリクエストフラグ
+private var visibility : boolean;       // 表示状態
+private var leftMargin : int;           // マージン幅
+private var topMargin : int;
+private var rightMargin : int;
+private var bottomMargin : int;
 
 // WebView のインストール
-static function Install(initialUrl : String) {
+static function Install() {
     if (instance == null) {
         // 更新用ゲームオブジェクトを作る。
         instance = (new GameObject()).AddComponent.<WebMediator>();
-        // 初期 URL を設定する。
-        instance.lastRequestedUrl = initialUrl;
         // プラットフォーム依存の組み込み。
         InstallPlatform();
     }
+}
+
+// マージン幅の設定
+static function SetMargin(left : int, top: int, right : int, bottom : int) {
+    instance.leftMargin = left;
+    instance.topMargin = top;
+    instance.rightMargin = right;
+    instance.bottomMargin = bottom;
+}
+
+// 表示状態の操作
+static function Show() {
+    instance.visibility = true;
+}
+static function Hide() {
+    instance.visibility = false;
+}
+static function IsVisible() {
+    return instance.visibility;
 }
 
 // 指定 URL のロードをリクエスト
@@ -73,33 +95,12 @@ private static function InstallPlatform() {
 
 private static function UpdatePlatform() {
     var activity = unityPlayerClass.GetStatic.<AndroidJavaObject>("currentActivity");
-    activity.Call("update", instance.lastRequestedUrl, instance.loadRequest);
+    activity.Call("updateWebView", instance.lastRequestedUrl ? instance.lastRequestedUrl : "", instance.loadRequest, instance.visibility, instance.leftMargin, instance.topMargin, instance.rightMargin, instance.bottomMargin);
 }
 
 static function PollMessage() : WebMediatorMessage {
     var activity = unityPlayerClass.GetStatic.<AndroidJavaObject>("currentActivity");
-    var message = activity.Call.<String>("pollMessage");
-    return message ? new WebMediatorMessage(message) : null;
-}
-
-#elif UNITY_IPHONE
-
-// iPhone 用実装
-
-@DllImportAttribute("__Internal") static private function _WebViewInjectorInstall(url : String) {}
-@DllImportAttribute("__Internal") static private function _WebViewInjectorLoadUrl(url : String) {}
-@DllImportAttribute("__Internal") static private function _WebViewInjectorPollMessage() : String {}
-
-private static function InstallPlatform() {
-    _WebViewInjectorInstall(instance.lastRequestedUrl);
-}
-
-private static function UpdatePlatform() {
-    if (instance.loadRequest) _WebViewInjectorLoadUrl(instance.lastRequestedUrl);
-}
-
-static function PollMessage() : WebMediatorMessage {
-    var message = _WebViewInjectorPollMessage();
+    var message = activity.Call.<String>("pollWebViewMessage");
     return message ? new WebMediatorMessage(message) : null;
 }
 
