@@ -1,6 +1,8 @@
 function UnityWebMediator() {
     this.android = navigator.userAgent.match(/Android/);
-    this.ios = navigator.userAgent.match(/iPhone/) || navigator.userAgent.match(/iPad/);
+    this.ios = navigator.userAgent.match(/iPhone/) || navigator.userAgent.match(/iPod/) || navigator.userAgent.match(/iPad/);
+
+    this.messageQueue = Array();
 
     this.callback = function(path, args) {
         var message = path;
@@ -16,9 +18,13 @@ function UnityWebMediator() {
         if (this.android) {
             UnityInterface.pushMessage(message);
         } else if (this.ios) {
-            window.location = "unity://callback" + message;
+            this.messageQueue.push(message);
         } else {
             console.log(message);
         }
     };
+
+    this.pollMessage = function() {
+        return this.messageQueue.shift();
+    }
 }
