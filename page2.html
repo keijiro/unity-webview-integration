@@ -23,8 +23,10 @@
   <script>
     unity = new UnityWebMediator;
 
-    unity.callback("/print", {line1:"First callback"});
-    unity.callback("/print", {line1:"Second callback (line1)", line2:"Second callback (line 2)"});
+    window.onload = function() {
+      unity.callback("/print", {line1:"First callback"});
+      unity.callback("/print", {line1:"Second callback (line1)", line2:"Second callback (line 2)"});
+    }
 
     function MultipleCallbackTest() {
         unity.callback("/note", {text:"This text have to be overwritten by the next callback."});
