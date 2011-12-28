@@ -1,6 +1,6 @@
 ### 概要
 
-Unity iOS および Android において web view 画面内に組み込み、その内部と連携を行うためのプラグインの実装例です。
+Unity iOS および Android において web view を画面内に組み込み、その内部と連携を行うためのプラグインの実装例です。
 
 ![screenshot](https://github.com/downloads/keijiro/unity-webview-integration/IMG_0004.jpg)
 
