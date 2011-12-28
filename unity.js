@@ -15,7 +15,7 @@ function UnityWebMediator() {
         
         if (this.android) {
             UnityInterface.pushMessage(message);
-        } else if (this.android) {
+        } else if (this.ios) {
             window.location = "unity://callback" + message;
         } else {
             console.log(message);
