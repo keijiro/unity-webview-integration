@@ -1,6 +1,6 @@
 function UnityWebMediator() {
     this.android = navigator.userAgent.match(/Android/);
-    this.ios = navigator.userAgent.match(/iOS/);
+    this.ios = navigator.userAgent.match(/iPhone/) || navigator.userAgent.match(/iPad/);
 
     this.callback = function(path, args) {
         var message = path;
