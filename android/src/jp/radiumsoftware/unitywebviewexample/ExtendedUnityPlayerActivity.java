@@ -9,10 +9,12 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import java.lang.InterruptedException;
 import java.util.concurrent.SynchronousQueue;
 
@@ -38,6 +40,7 @@ public class ExtendedUnityPlayerActivity extends UnityPlayerActivity {
 
     private JSInterface mJSInterface;   // JavaScript interface (message receiver)
     private WebView mWebView;           // WebView object
+    private ProgressBar mProgress;      // Progress bar
     private int mLeftMargin;            // Margins around the WebView
     private int mTopMargin;
     private int mRightMargin;
@@ -56,9 +59,24 @@ public class ExtendedUnityPlayerActivity extends UnityPlayerActivity {
         webSettings.setSupportZoom(false);
         webSettings.setJavaScriptEnabled(true);
         webSettings.setPluginsEnabled(true);
-        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        //webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         // Set a dummy WebViewClient (which enables loading a new page in own WebView).
         mWebView.setWebViewClient(new WebViewClient(){});
+        // Add a progress bar.
+        mProgress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        layout.addView(mProgress, new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, 5));
+        mProgress.setMax(100);
+        mProgress.setVisibility(View.GONE);
+        mWebView.setWebChromeClient(new WebChromeClient() {
+            public void onProgressChanged(WebView view, int progress) {
+                if (progress < 100) {
+                    mProgress.setVisibility(View.VISIBLE);
+                    mProgress.setProgress(progress);
+                } else {
+                    mProgress.setVisibility(View.GONE);
+                }
+            }
+        });
         // Create a JavaScript interface and bind the WebView to it.
         mJSInterface = new JSInterface();
         mWebView.addJavascriptInterface(mJSInterface, "UnityInterface");

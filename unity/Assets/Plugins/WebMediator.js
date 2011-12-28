@@ -51,6 +51,7 @@ static function SetMargin(left : int, top: int, right : int, bottom : int) {
     instance.topMargin = top;
     instance.rightMargin = right;
     instance.bottomMargin = bottom;
+    ApplyMarginsPlatform();
 }
 
 // Visibility functions.
@@ -81,7 +82,44 @@ function Update() {
 
 private static function InstallPlatform() { }
 private static function UpdatePlatform() { }
+private static function ApplyMarginsPlatform() { }
 static function PollMessage() : WebMediatorMessage { return null; }
+
+#elif UNITY_IPHONE
+
+// iOS platform implementation.
+
+@DllImportAttribute("__Internal") static private function _WebViewPluginInstall() {}
+@DllImportAttribute("__Internal") static private function _WebViewPluginLoadUrl(url : String) {}
+@DllImportAttribute("__Internal") static private function _WebViewPluginSetVisibility(visibility : boolean) {}
+@DllImportAttribute("__Internal") static private function _WebViewPluginSetMargins(left : int, top : int, right : int, bottom : int) {}
+@DllImportAttribute("__Internal") static private function _WebViewPluginPollMessage() : String {}
+
+private static var viewVisibility : boolean;
+
+private static function InstallPlatform() {
+    _WebViewPluginInstall();
+}
+
+private static function ApplyMarginsPlatform() {
+    _WebViewPluginSetMargins(instance.leftMargin, instance.topMargin, instance.rightMargin, instance.bottomMargin);
+}
+
+private static function UpdatePlatform() {
+    if (viewVisibility != instance.visibility) {
+        viewVisibility = instance.visibility;
+        _WebViewPluginSetVisibility(viewVisibility);
+    }
+    if (instance.loadRequest) {
+        instance.loadRequest = false;
+        _WebViewPluginLoadUrl(instance.lastRequestedUrl);
+    }
+}
+
+static function PollMessage() : WebMediatorMessage {
+    var message =  _WebViewPluginPollMessage();
+    return message ? new WebMediatorMessage(message) : null;
+}
 
 #elif UNITY_ANDROID
 
@@ -92,6 +130,8 @@ private static var unityPlayerClass : AndroidJavaClass;
 private static function InstallPlatform() {
     unityPlayerClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
 }
+
+private static function ApplyMarginsPlatform() { }
 
 private static function UpdatePlatform() {
     var activity = unityPlayerClass.GetStatic.<AndroidJavaObject>("currentActivity");
