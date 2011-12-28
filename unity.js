@@ -27,4 +27,6 @@ function UnityWebMediator() {
     this.pollMessage = function() {
         return this.messageQueue.shift();
     }
+    
+    unityWebMediatorInstance = this;
 }
