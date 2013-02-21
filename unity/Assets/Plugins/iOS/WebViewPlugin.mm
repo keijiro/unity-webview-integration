@@ -30,12 +30,20 @@ extern "C" void _WebViewPluginSetMargins(int left, int top, int right, int botto
     CGRect frame = rootViewController.view.frame;
     CGFloat scale = rootViewController.view.contentScaleFactor;
     
-    frame.size.width -= (left + right) / scale;
-    frame.size.height -= (top + bottom) / scale;
+    CGRect screenBound = [[UIScreen mainScreen] bounds];
+    CGSize screenSize = screenBound.size;
+    // landscape
+    if (orientation) {
+        frame.size.width = screenSize.height - (left + right) / scale;
+        frame.size.height = screenSize.width - (top + bottom) / scale;
+    } else { // portrait
+        frame.size.width = screenSize.width - (left + right) / scale;
+        frame.size.height = screenSize.height - (top + bottom) / scale;
+    }
     
     frame.origin.x += left / scale;
     frame.origin.y += top / scale;
-    
+
     webView.frame = frame;
 }
 
