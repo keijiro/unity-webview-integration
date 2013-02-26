@@ -16,6 +16,11 @@ extern "C" void _WebViewPluginInstall() {
     [rootViewController.view addSubview:webView];
 }
 
+extern "C" void _WebViewPluginMakeTransparentBackground() {
+    [webView setBackgroundColor:[UIColor clearColor]];
+    [webView setOpaque:NO];
+}
+
 extern "C" void _WebViewPluginLoadUrl(const char* url) {
     [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithUTF8String:url]]]];
 }
