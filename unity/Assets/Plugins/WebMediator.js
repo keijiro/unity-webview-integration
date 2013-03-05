@@ -25,6 +25,7 @@ class WebMediatorMessage {
 }
 
 private static var instance : WebMediator;
+private static var isClearCache : boolean;
 
 private var lastRequestedUrl : String;
 private var loadRequest : boolean;
@@ -65,6 +66,16 @@ static function IsVisible() {
     return instance.visibility;
 }
 
+static function SetClearCache()
+{
+    isClearCache = true;
+}
+
+static function SetCache()
+{
+    isClearCache = false;
+}
+
 // Load the page at the URL.
 static function LoadUrl(url : String) {
     instance.lastRequestedUrl = url;
@@ -84,16 +95,18 @@ private static function InstallPlatform() { }
 private static function UpdatePlatform() { }
 private static function ApplyMarginsPlatform() { }
 static function PollMessage() : WebMediatorMessage { return null; }
+static function MakeTransparentWebViewBackground() { }
 
 #elif UNITY_IPHONE
 
 // iOS platform implementation.
 
 @DllImportAttribute("__Internal") static private function _WebViewPluginInstall() {}
-@DllImportAttribute("__Internal") static private function _WebViewPluginLoadUrl(url : String) {}
+@DllImportAttribute("__Internal") static private function _WebViewPluginLoadUrl(url : String, isClearCache : boolean) {}
 @DllImportAttribute("__Internal") static private function _WebViewPluginSetVisibility(visibility : boolean) {}
 @DllImportAttribute("__Internal") static private function _WebViewPluginSetMargins(left : int, top : int, right : int, bottom : int) {}
 @DllImportAttribute("__Internal") static private function _WebViewPluginPollMessage() : String {}
+@DllImportAttribute("__Internal") static private function _WebViewPluginMakeTransparentBackground() {}
 
 private static var viewVisibility : boolean;
 
@@ -112,13 +125,18 @@ private static function UpdatePlatform() {
     }
     if (instance.loadRequest) {
         instance.loadRequest = false;
-        _WebViewPluginLoadUrl(instance.lastRequestedUrl);
+        _WebViewPluginLoadUrl(instance.lastRequestedUrl, isClearCache);
     }
 }
 
 static function PollMessage() : WebMediatorMessage {
     var message =  _WebViewPluginPollMessage();
     return message ? new WebMediatorMessage(message) : null;
+}
+
+static function MakeTransparentWebViewBackground()
+{
+    _WebViewPluginMakeTransparentBackground();
 }
 
 #elif UNITY_ANDROID
@@ -142,6 +160,12 @@ static function PollMessage() : WebMediatorMessage {
     var activity = unityPlayerClass.GetStatic.<AndroidJavaObject>("currentActivity");
     var message = activity.Call.<String>("pollWebViewMessage");
     return message ? new WebMediatorMessage(message) : null;
+}
+
+static function MakeTransparentWebViewBackground()
+{
+    var activity = unityPlayerClass.GetStatic.<AndroidJavaObject>("currentActivity");
+    activity.Call("makeTransparentWebViewBackground");
 }
 
 #endif
