@@ -25,6 +25,7 @@ class WebMediatorMessage {
 }
 
 private static var instance : WebMediator;
+private static var isClearCache : boolean;
 
 private var lastRequestedUrl : String;
 private var loadRequest : boolean;
@@ -65,6 +66,16 @@ static function IsVisible() {
     return instance.visibility;
 }
 
+static function SetClearCache()
+{
+    isClearCache = true;
+}
+
+static function SetCache()
+{
+    isClearCache = false;
+}
+
 // Load the page at the URL.
 static function LoadUrl(url : String) {
     instance.lastRequestedUrl = url;
@@ -91,7 +102,7 @@ static function MakeTransparentWebViewBackground() { }
 // iOS platform implementation.
 
 @DllImportAttribute("__Internal") static private function _WebViewPluginInstall() {}
-@DllImportAttribute("__Internal") static private function _WebViewPluginLoadUrl(url : String) {}
+@DllImportAttribute("__Internal") static private function _WebViewPluginLoadUrl(url : String, isClearCache : boolean) {}
 @DllImportAttribute("__Internal") static private function _WebViewPluginSetVisibility(visibility : boolean) {}
 @DllImportAttribute("__Internal") static private function _WebViewPluginSetMargins(left : int, top : int, right : int, bottom : int) {}
 @DllImportAttribute("__Internal") static private function _WebViewPluginPollMessage() : String {}
@@ -114,7 +125,7 @@ private static function UpdatePlatform() {
     }
     if (instance.loadRequest) {
         instance.loadRequest = false;
-        _WebViewPluginLoadUrl(instance.lastRequestedUrl);
+        _WebViewPluginLoadUrl(instance.lastRequestedUrl, isClearCache);
     }
 }
 
