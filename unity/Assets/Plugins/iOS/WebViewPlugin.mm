@@ -16,7 +16,15 @@ extern "C" void _WebViewPluginInstall() {
     [rootViewController.view addSubview:webView];
 }
 
-extern "C" void _WebViewPluginLoadUrl(const char* url) {
+extern "C" void _WebViewPluginMakeTransparentBackground() {
+    [webView setBackgroundColor:[UIColor clearColor]];
+    [webView setOpaque:NO];
+}
+
+extern "C" void _WebViewPluginLoadUrl(const char* url, boolean isClearCache) {
+    if (isClearCache) {
+        [[NSURLCache sharedURLCache] removeAllCachedResponses];
+    }
     [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithUTF8String:url]]]];
 }
 
@@ -30,12 +38,23 @@ extern "C" void _WebViewPluginSetMargins(int left, int top, int right, int botto
     CGRect frame = rootViewController.view.frame;
     CGFloat scale = rootViewController.view.contentScaleFactor;
     
-    frame.size.width -= (left + right) / scale;
-    frame.size.height -= (top + bottom) / scale;
+    CGRect screenBound = [[UIScreen mainScreen] bounds];
+    CGSize screenSize = screenBound.size;
+    // Obtaining the current device orientation
+    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+    
+    // landscape
+    if (orientation) {
+        frame.size.width = screenSize.height - (left + right) / scale;
+        frame.size.height = screenSize.width - (top + bottom) / scale;
+    } else { // portrait
+        frame.size.width = screenSize.width - (left + right) / scale;
+        frame.size.height = screenSize.height - (top + bottom) / scale;
+    }
     
     frame.origin.x += left / scale;
     frame.origin.y += top / scale;
-    
+
     webView.frame = frame;
 }
 

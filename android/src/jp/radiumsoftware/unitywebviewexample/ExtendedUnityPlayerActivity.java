@@ -129,4 +129,9 @@ public class ExtendedUnityPlayerActivity extends UnityPlayerActivity {
     public String pollWebViewMessage() {
         return mJSInterface.mMessageQueue.poll();
     }
+    
+    // Transparent background
+    public void makeTransparentWebViewBackground() {
+        mWebView.setBackgroundColor(Color.TRANSPARENT);
+    }
 } 
