@@ -4,6 +4,7 @@ package jp.radiumsoftware.unitywebviewexample;
 
 import com.unity3d.player.UnityPlayerActivity;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
